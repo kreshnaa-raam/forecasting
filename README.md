@@ -2,10 +2,26 @@
 
 A library for composable forecasting models built on top of scikit-learn
 
+<!-- Add intro that provides project context. -->
+<!-- FTR - final technical report. Everything must link to there - except for this doc. Link to task numbers -->
+<!-- TODO: Get permalink for FTR once published and link it from here! -->
+
+<!-- Explain what this does for lawyers... it solves this particular problem for the FTR - as well as this class of problem in general -->
+<!-- Expand on connections to SOPO: be clear about mapping to the things we completed. Make sure keyword searches will work -->
+<!-- Read SOPO: look for nouns in the relevant task descriptions. -->
+<!--  -->
+<!--  -->
+<!--  -->
+<!--  -->
+<!--  -->
+
+
 The API for fit, predict, and metrics is reduced to specifying a start and end times for a given location.
 The model must construct feature data using column transforms. Having done so, forecasting as a service become trivial.
 
 ## Installation
+
+<!-- Talk about env for this to run - should be a complete description - provide the context. -->
 
 requires the eccodes library: `apt-get install libeccodes-dev`
 
@@ -14,6 +30,9 @@ requires the eccodes library: `apt-get install libeccodes-dev`
 Verify you can run the unit tests `python -m unittest`
 
 If running in a container, to start a notebook use `jupyter notebook --NotebookApp.ip=0.0.0.0`
+
+
+<!-- Phase 2 (after FTR accepted): add docker container in July -->
 
 ## Usage
 Models can be composed of mixins for various estimators and forecast processes.
