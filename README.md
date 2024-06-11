@@ -9,11 +9,6 @@ A library for composable forecasting models built on top of scikit-learn
 <!-- Explain what this does for lawyers... it solves this particular problem for the FTR - as well as this class of problem in general -->
 <!-- Expand on connections to SOPO: be clear about mapping to the things we completed. Make sure keyword searches will work -->
 <!-- Read SOPO: look for nouns in the relevant task descriptions. -->
-<!--  -->
-<!--  -->
-<!--  -->
-<!--  -->
-<!--  -->
 
 
 The API for fit, predict, and metrics is reduced to specifying a start and end times for a given location.
@@ -37,6 +32,10 @@ If running in a container, to start a notebook use `jupyter notebook --NotebookA
 ## Usage
 Models can be composed of mixins for various estimators and forecast processes.
 
+<!-- Exaplain wha this does - for lawyers... point to ipynb example -->
+<!-- Consider adding sklearn model diagram if it would help (rather than hurt) the explination -->
+
+
 An ordinary least squares model for a Balancing Area Hourly Load
 ```python
 class NpOlsModel(BalancingAreaHourly, LinearRegressor, RegularTimeSeriesModel):
@@ -49,16 +48,16 @@ class XgbModel(BalancingAreaHourly, XgbRegressor, RegularTimeSeriesModel):
 ```
 
 The initialization arguments control feature construction.
+<!-- Expand on this - show examples -->
 
 
-### Trained models should be fully serializable using Cloud Pickle for maximum flexibility
-
-
+<!-- Developers commonly use ipython notebooks for data science and... -->
 It is easy to work with time series models in a
 [Colab Notebook](https://colab.research.google.com/drive/1Tpoxdyf7aN1kyPrPb0L4uaZrmHQnHyB1?usp=sharing)
 
 
 ## Contents
+<!-- Add context: domain specific techincal langauge to help engineers find specific functionality in the repository -->
 
 * `data_fetchers/`: data fetchers and associated tests -- see directory-specific README.
 * `back_test.py`: BackTest class for estimating model performance on out-of-sample data using a time series (rolling)
