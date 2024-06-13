@@ -1,6 +1,6 @@
 # Time Series Models
 
-A library for composable forecasting models built on top of scikit-learn
+A library for composable forecasting models built on top of [scikit-learn](https://scikit-learn.org/stable/)
 
 
 <!-- Add intro that provides project context. -->
@@ -19,33 +19,65 @@ The model must construct feature data using column transforms. Having done so, f
 
 <!-- Talk about env for this to run - should be a complete description - provide the context. -->
 
-This library is designed for use by technical engineers and data scientists. It takes advantage of the python
+This library is designed for use by technical engineers and data scientists. It takes advantage of the Python
 data science ecosystem and therefore requires installation of many third party open source libraries. It has 
-been developed and tested in a linux operating system. Running on a docker container such as 
+been developed and tested in a Linux operating system. Running on a Docker container such as 
 the [canonical Ubuntu image](https://hub.docker.com/_/ubuntu) is strongly recommended. The library was 
 developed using Ubuntu 22.04 (Jammy) with Python 3.10.6.
 
 ### Installing system libraries
-Reading the grib weather data requires the eccodes library: `apt-get install libeccodes-dev`
 
-### Installing python libraries
-`pip3 install -r requirements.txt`
+After installing [Docker](https://docs.docker.com/engine/install/), run the following command to setup a basic Jammy container with this library:
 
-Verify you can run the unit tests `python -m unittest`
+```sh
+docker run -it ubuntu:jammy /bin/bash
+apt-get update
+apt-get install git
+git clone https://github.com/SETO2243/forecasting.git
+cd /forecasting
+```
+Reading the grib weather data requires the eccodes library, which is available from the Jammy package repo, installable via shell:
 
-To start jupyter notebook run `jupyter notebook --NotebookApp.ip=0.0.0.0`
-Now you can open the example notebook and execute the cells in the demonstration.
+```sh
+apt-get install libeccodes-dev
+```
+
+### Installing Python libraries
+
+Run the following command to install Python package dependencies:
+
+```sh
+pip3 install -r requirements.txt
+```
+
+### Validating your environment
+
+Verify that your environment is fully functional by running the automated unit tests:
+
+```sh
+python -m unittest
+```
+
+This will print "SUCCESS" near the end if the code work correctly in your new environment.
+
+To start jupyter notebook run:
+
+```sh
+jupyter notebook --NotebookApp.ip=0.0.0.0
+```
+
+This will print a URL, which you can open in your browser. Then open the example notebook and execute the cells in the demonstration to get acquainted with the functionality.
 
 <!-- Phase 2 (after FTR accepted): add docker container in July -->
 
 ## Usage
 Models can be composed of mixins for various estimators and forecast processes. These composable
-pieces can be put together in different ways to solve many problems. The RegularTimeSeriesModel is the base.
-The core that problem specific parts are added to when forecasting or gap filling a particular timeseries.
+pieces can be put together in different ways to solve many problems. The RegularTimeSeriesModel is the
+core that problem specific parts are added to when forecasting or gap filling a particular timeseries.
 The estimator is the next essential building block. It can be a Classifier or a Regressor. There are many 
 different numerical techniques that can be applied via the estimator. The process is the last essential 
 component. It defines the timeseries being forecast and the available feature data that might have predictive value.
-Having composed a Model class from these three parts, it is then up to the user to create an instance of the class that 
+Having composed a Model class from these three parts, it is then up to the user to create an instance of the class 
 with configuration arguments that tune the model features for the specific meter load or pv forecast. 
 
 
@@ -54,13 +86,15 @@ with configuration arguments that tune the model features for the specific meter
 
 ### Compose a model class
 
-A model using an Ordinary Least Squares estimator to forecast a Balancing Area Hourly Load
+New models are defined as Python classes, which utilize building blocks provided by this library as base classes. For example, here is the beginning of a model using an Ordinary Least Squares estimator to forecast Balancing Area Hourly Load:
+
 ```python
 class NpOlsModel(BalancingAreaHourly, LinearRegressor, RegularTimeSeriesModel):
-  pass
+  ...
 ```
 
-A model using an XgBoost estimator to forecast AMI (meter) Hourly Load
+And this example is model using an [XgBoost](https://xgboost.readthedocs.io/en/stable/) estimator to forecast AMI (meter) Hourly Load:
+
 ```python
 class XgbModel(AmiHourlyForecast, XgbRegressor, RegularTimeSeriesModel):
   pass
@@ -110,10 +144,10 @@ instance.predict_dataframe(
 
 ### Usage
 Engineers and data scientists commonly use an interactive web-based development environment called [Jupyter Notebook](https://jupyter.org/)
-(now jupyter lab) to explore and visualize data and algorithms in a cell based execution environment. 
+(now Jupyter Lab) to explore and visualize data and algorithms in a cell based execution environment. 
 <!-- Developers commonly use ipython notebooks for data science and... -->
 
-An [example notebook](https://github.com/SETO2243/forecasting/blob/main/example.ipynb) is provided in this github
+An [example notebook](https://github.com/SETO2243/forecasting/blob/main/example.ipynb) is provided in this GitHub
 repository which demonstrates the core capabilities of the time series models library developed for the SETO project. 
 
 ## Input Data
@@ -133,13 +167,13 @@ These cloud providers host the petabyte scale archive of grib2 files created by 
 As part of the project a set of metadata file that index the archive was created using an open source tool
 called [Kerchunk](https://github.com/fsspec/kerchunk). The weather data is a public archive provided by NODD. To use it
 the timeseries models developed for the project a kerchunk metadata index must be created. A sample index is provided
-in the project [GCP bucket](https://console.cloud.google.com/storage/browser/seto2243-forecasting).
+in the project [GCS bucket](https://console.cloud.google.com/storage/browser/seto2243-forecasting).
 
 
 ## Contents
 <!-- Add context: domain specific technical langauge to help engineers find specific functionality in the repository -->
 
-The following contents uses domain specific language to help engineers (users) find specific functionality implemented by the library 
+Library code is organized into a number of subpackages described below, to aid engineers working on writing or debugging code using this library:
 
 
 * `data_fetchers/`: data fetchers and associated tests -- see directory-specific README.
