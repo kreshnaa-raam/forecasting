@@ -3,6 +3,16 @@
 A library for composable forecasting models built on top of [scikit-learn](https://scikit-learn.org/stable/)
 
 
+This software library is the open source package for the work done in task 2: Endpoint data process and Analysis. The
+package includes meter level forecasting and gap filling for customer load as well as photovoltaic (PV) generation 
+forecast models for short term and intra-day PV forecasting.
+
+The package provides the tools to construct machine learning models that fill gaps or forecast in the verification
+datasets. This includes loading the data and applying the XGBoost estimator as described in section 3.1 of the Final Technical
+Review (FTR). The composable model framework described below provides the configurable model inputs required for the 
+Neighbor Informed Estimates and Community Analytics. The PV System model in section 3.2 of the FTR is also implemented using
+the composable model framework. Example PV model construction is shown below.
+
 <!-- Add intro that provides project context. -->
 <!-- FTR - final technical report. Everything must link to there - except for this doc. Link to task numbers -->
 <!-- TODO: Get permalink for FTR once published and link it from here! -->
@@ -74,11 +84,13 @@ This will print a URL, which you can open in your browser. Then open the example
 Models can be composed of mixins for various estimators and forecast processes. These composable
 pieces can be put together in different ways to solve many problems. The RegularTimeSeriesModel is the
 core that problem specific parts are added to when forecasting or gap filling a particular timeseries.
-The estimator is the next essential building block. It can be a Classifier or a Regressor. There are many 
-different numerical techniques that can be applied via the estimator. The process is the last essential 
-component. It defines the timeseries being forecast and the available feature data that might have predictive value.
-Having composed a Model class from these three parts, it is then up to the user to create an instance of the class 
-with configuration arguments that tune the model features for the specific meter load or pv forecast. 
+The [estimator](https://scikit-learn.org/stable/developers/develop.html#estimators) is the next essential building 
+block. The estimator can be either a Classifier (a discrete estimator) or a Regressor (a continuous estimator). There 
+are many different numerical techniques for [supervised learning](https://scikit-learn.org/stable/supervised_learning.html)
+estimators. The process is the last essential component. It defines the timeseries being forecast and the available 
+feature data that might have predictive value. Having composed a Model class from these three parts, it is then up to 
+the user to create an instance of the class with configuration arguments that tune the model features for the specific
+meter load or pv forecast. 
 
 
 <!-- Explain what this does - for lawyers... point to ipynb example -->
@@ -89,7 +101,7 @@ with configuration arguments that tune the model features for the specific meter
 New models are defined as Python classes, which utilize building blocks provided by this library as base classes. For example, here is the beginning of a model using an Ordinary Least Squares estimator to forecast Balancing Area Hourly Load:
 
 ```python
-class NpOlsModel(BalancingAreaHourly, LinearRegressor, RegularTimeSeriesModel):
+class OlsModel(BalancingAreaHourly, LinearRegressor, RegularTimeSeriesModel):
   ...
 ```
 
@@ -100,14 +112,21 @@ class XgbModel(AmiHourlyForecast, XgbRegressor, RegularTimeSeriesModel):
   pass
 ```
 
-Additional behaviors like filters can also be added via composition. See the notebook demo for examples.
+Additional behaviors including [filters](https://github.com/SETO2243/forecasting/blob/main/time_series_models/filters.py) 
+and [hyperparameter tuning](https://scikit-learn.org/stable/modules/grid_search.html) can also be added via composition.
+See the notebook demo for examples.
 
 ### Configure a model instance
-The initialization arguments control feature construction. The configuration arguments are specific to the
-process and the estimator used to compose the model.
+The initialization arguments control the model input feature. The configuration arguments are specific to the
+process and the estimator used to compose the model. The process class (e.g. AmiHourlyForecast) implements the set 
+of possible input features that can be configured. When the model instance is created the specific set of input
+features for the specific model is defined. Additional parameters can also be passed to the estimator or other 
+components.
 
-As an example, we can configure XgbModel from above with three types of features: lagged correlations, one hot encoded 
-day-of-week values and a harmonic feature that decomposes time into a sine and cosine waves with the specified frequencies.
+As an example, we can configure XgbModel from above with three types of features: lagged features as described in the
+FTR (Section 3.1.2.2.1),
+[one hot encoded](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.OneHotEncoder.html) 
+day-of-week values, and a harmonic feature that decomposes time into a sine and cosine waves with the specified frequencies.
 ```python
 config = dict(
 lags = np.array([24, 48, 168], dtype="timedelta64[h]"),
@@ -119,8 +138,8 @@ instance = XgbModel(**config)
 
 ### Fit & Predict
 Once a model instance is created, we must train the machine learning algorithm. The fit method takes
-a start date, stop date and a list of one or more identifiers. For process classes that support it, this
-allows training a single model for a cohort of resources.
+a start date, stop date and a list of one or more identifiers. For process classes that support it, passing
+multiple identifiers allows training a single model for a cohort of resources.
 
 ```python
 instance.fit("2021-01-15", "2021-06-01", "55797646")
@@ -142,6 +161,33 @@ instance.predict_dataframe(
 <!-- Expand on this - show examples -->
 
 
+### PV Model
+The PV Model as described in the FTR section 3.2 uses the same composable framework define models
+using the HRRR weather (see below) as an input to the NREL PySam PV generatin algorithm. For the 
+project we used the PySam generation forecast directly using the configration shown below with the
+IdentityRegressor. Building additional input features for sites with direct telemetry would allow
+using machine learning models like xgboost too.
+
+```python
+pv_config = dict(
+    site_config_mapping="RESOURCE_SELF",
+    site_meter_mapping=None,
+    site_latlong_mapping="RESOURCE_SELF",
+    source_mode="12_hour_horizon",
+    lags=None,
+)
+
+class PVForecastModel(
+    PVForecast,
+    IdentityRegressor,
+    RegularTimeSeriesModel,
+):
+    pass
+
+pv_instance = PVForecastModel(**pv_config)
+pv_instance.model
+```
+
 ### Usage
 Engineers and data scientists commonly use an interactive web-based development environment called [Jupyter Notebook](https://jupyter.org/)
 (now Jupyter Lab) to explore and visualize data and algorithms in a cell based execution environment. 
@@ -149,6 +195,8 @@ Engineers and data scientists commonly use an interactive web-based development 
 
 An [example notebook](https://github.com/SETO2243/forecasting/blob/main/example.ipynb) is provided in this GitHub
 repository which demonstrates the core capabilities of the time series models library developed for the SETO project. 
+
+<!-- Add good screen shot -->
 
 ## Input Data
 
