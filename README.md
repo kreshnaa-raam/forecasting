@@ -3,7 +3,7 @@
 A library for composable forecasting models built on top of [scikit-learn](https://scikit-learn.org/stable/)
 
 
-This software library is the open source package for the work done in task 2: Endpoint data process and Analysis. The
+This software library is the open source package for the work done for [SETO project 2243](https://www.energy.gov/eere/solar/seto-2020-artificial-intelligence-applications-solar-energy#:~:text=for%20unobservable%20areas.-,Camus%20Energy,-Project%20Name%3A), _Improving Grid Awareness by Empowering Utilities with Machine Learning and Artificial Intelligence_, specifically task 2: _Endpoint data process and Analysis_. The
 package includes meter level forecasting and gap filling for customer load as well as photovoltaic (PV) generation 
 forecast models for short term and intra-day PV forecasting.
 
@@ -13,21 +13,13 @@ Review (FTR). The composable model framework described below provides the config
 Neighbor Informed Estimates and Community Analytics. The PV System model in section 3.2 of the FTR is also implemented using
 the composable model framework. Example PV model construction is shown below.
 
-<!-- Add intro that provides project context. -->
-<!-- FTR - final technical report. Everything must link to there - except for this doc. Link to task numbers -->
 <!-- TODO: Get permalink for FTR once published and link it from here! -->
-
-<!-- Explain what this does for lawyers... it solves this particular problem for the FTR - as well as this class of problem in general -->
-<!-- Expand on connections to SOPO: be clear about mapping to the things we completed. Make sure keyword searches will work -->
-<!-- Read SOPO: look for nouns in the relevant task descriptions. -->
 
 
 The API for fit, predict, and metrics is reduced to specifying a start and end times for a given location.
 The model must construct feature data using column transforms. Having done so, forecasting as a service become trivial.
 
 ## Installation
-
-<!-- Talk about env for this to run - should be a complete description - provide the context. -->
 
 This library is designed for use by technical engineers and data scientists. It takes advantage of the Python
 data science ecosystem and therefore requires installation of many third party open source libraries. It has 
@@ -105,7 +97,7 @@ class OlsModel(BalancingAreaHourly, LinearRegressor, RegularTimeSeriesModel):
   ...
 ```
 
-And this example is model using an [XgBoost](https://xgboost.readthedocs.io/en/stable/) estimator to forecast AMI (meter) Hourly Load:
+And this example is model using an [XgBoost](https://xgboost.readthedocs.io/en/stable/) estimator to forecast AMI (smart meter) Hourly Load:
 
 ```python
 class XgbModel(AmiHourlyForecast, XgbRegressor, RegularTimeSeriesModel):
@@ -191,7 +183,6 @@ pv_instance.model
 ### Usage
 Engineers and data scientists commonly use an interactive web-based development environment called [Jupyter Notebook](https://jupyter.org/)
 (now Jupyter Lab) to explore and visualize data and algorithms in a cell based execution environment. 
-<!-- Developers commonly use ipython notebooks for data science and... -->
 
 An [example notebook](https://github.com/SETO2243/forecasting/blob/main/example.ipynb) is provided in this GitHub
 repository which demonstrates the core capabilities of the time series models library developed for the SETO project. 
