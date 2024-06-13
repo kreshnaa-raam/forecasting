@@ -70,7 +70,7 @@ jupyter notebook --NotebookApp.ip=0.0.0.0
 
 This will print a URL, which you can open in your browser. Then open the example notebook and execute the cells in the demonstration to get acquainted with the functionality.
 
-<!-- Phase 2 (after FTR accepted): add docker container in July -->
+<!-- TODO: add docker executable image in July 2024 -->
 
 ## Usage
 Models can be composed of mixins for various estimators and forecast processes. These composable
@@ -82,11 +82,7 @@ are many different numerical techniques for [supervised learning](https://scikit
 estimators. The process is the last essential component. It defines the timeseries being forecast and the available 
 feature data that might have predictive value. Having composed a Model class from these three parts, it is then up to 
 the user to create an instance of the class with configuration arguments that tune the model features for the specific
-meter load or pv forecast. 
-
-
-<!-- Explain what this does - for lawyers... point to ipynb example -->
-<!-- Consider adding sklearn model diagram if it would help (rather than hurt) the explanation -->
+meter load or pv forecast.
 
 ### Compose a model class
 
@@ -127,6 +123,11 @@ harmonics = np.array([24, 168, 365*24], dtype="timedelta64[h]")
 )
 instance = XgbModel(**config)
 ```
+Below is the [sklearn model diagram](https://scikit-learn.org/stable/auto_examples/miscellaneous/plot_pipeline_display.html)
+for the pipeline of transformations that implement the model.
+
+*Replace this placeholder diagram generated using the camus internal version of the forecast library.
+![Meter Model Diagram](https://github.com/SETO2243/forecasting/assets/84335963/4e07aaf5-b164-4aa8-8948-d6bed83c716d)
 
 ### Fit & Predict
 Once a model instance is created, we must train the machine learning algorithm. The fit method takes
@@ -148,10 +149,6 @@ instance.predict_dataframe(
 )
 ```
 ![Predicted & Actual Values](https://github.com/SETO2243/forecasting/assets/84335963/99cdaaf1-d15a-40fd-bbfa-534da6de4b49)
-
-
-<!-- Expand on this - show examples -->
-
 
 ### PV Model
 The PV Model as described in the FTR section 3.2 uses the same composable framework define models
@@ -179,6 +176,8 @@ class PVForecastModel(
 pv_instance = PVForecastModel(**pv_config)
 pv_instance.model
 ```
+*Replace this placeholder diagram generated using the camus internal version of the forecast library.
+![PV Model Diagram](https://github.com/SETO2243/forecasting/assets/84335963/91bbd896-b342-4219-9ee5-c6487b1aa363)
 
 ### Usage
 Engineers and data scientists commonly use an interactive web-based development environment called [Jupyter Notebook](https://jupyter.org/)
@@ -187,12 +186,11 @@ Engineers and data scientists commonly use an interactive web-based development 
 An [example notebook](https://github.com/SETO2243/forecasting/blob/main/example.ipynb) is provided in this GitHub
 repository which demonstrates the core capabilities of the time series models library developed for the SETO project. 
 
-<!-- Add good screen shot -->
+<!-- TODO: Add screen shot of dockerized output, July 2024-->
 
 ## Input Data
 
-<!-- AMI meter data from PNNL-->
-<!-- HRRR operational forecast data from NOAA-->
+<!-- TODO: add docs for AMI meter data from PNNL-->
 
 ### High Resolution Rapid Refresh weather data
 The [High Resolution Rapid Refresh](https://rapidrefresh.noaa.gov/hrrr/) (HRRR) forecast is an operational weather 
