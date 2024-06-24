@@ -190,7 +190,8 @@ repository which demonstrates the core capabilities of the time series models li
 
 ## Input Data
 
-<!-- TODO: add docs for AMI meter data from PNNL-->
+Sample AMI meter data for 4 meters is available for validation in a public GCS bucket: gs://seto2243-forecasting/ami_validation
+Customer data used in the project is available upon completion of an NDA as described in the FTR.
 
 ### High Resolution Rapid Refresh weather data
 The [High Resolution Rapid Refresh](https://rapidrefresh.noaa.gov/hrrr/) (HRRR) forecast is an operational weather 
@@ -206,12 +207,11 @@ called [Kerchunk](https://github.com/fsspec/kerchunk). The weather data is a pub
 the timeseries models developed for the project a kerchunk metadata index must be created. A sample index is provided
 in the project [GCS bucket](https://console.cloud.google.com/storage/browser/seto2243-forecasting).
 
+A kerchunk aggregation of select variables from the 12 hour forecast for 2021 is available in a public GCS bucket: gs://seto2243-forecasting/high-resolution-rapid-refresh
 
 ## Contents
-<!-- Add context: domain specific technical langauge to help engineers find specific functionality in the repository -->
 
 Library code is organized into a number of subpackages described below, to aid engineers working on writing or debugging code using this library:
-
 
 * `data_fetchers/`: data fetchers and associated tests -- see directory-specific README.
 * `back_test.py`: BackTest class for estimating model performance on out-of-sample data using a time series (rolling)
