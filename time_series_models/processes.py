@@ -150,7 +150,7 @@ class AmiHourlyForecast(Process):
         # we don't want to interpolate missing labels -- these should be skipped during training and evaluation!
         self._energy_fetcher = AmiFetcher(
             location_mapper=lambda x: x,
-            units="watts",
+            units="energy",
         )
         self._net_energy_pipeline = net_energy_pipeline(self.energy_fetcher)
         self._overfetched_range_pipeline = overfetched_range_pipeline(
@@ -220,6 +220,8 @@ class AmiHourlyForecast(Process):
         day_of_week: bool = False,
         business_day: bool = False,
         harmonics: list | np.ndarray = None,
+        # mapping: typing.Callable | None = None,
+        mapping: dict | None = None,
         **kwargs,
     ):
         logger.info("creating lags %s", lags)
@@ -246,10 +248,12 @@ class AmiHourlyForecast(Process):
                     self._weather_fetcher_name,
                     HrrrFetcher(
                         location_mapper="RESOURCE_LOOKUP",
+                        location_mapping=mapping,
                         selector="select",
                         selector_args={"variables": met_vars},
                         source_mode=f"{met_horizon}_hour_horizon",
                         resource_type="meter/electrical",
+                        resource_query="No-Op",
                     ),
                     [0],
                 )
@@ -428,7 +432,7 @@ class PVForecast(Process):
         # Optimization hack - don't bother trying to fetch the range when there is no mapping
         # Need to revisit once we have a mapping for some but not most PV systems
         # Set all the properties to point to the nan fetcher.
-        self._range_fetcher = None
+        self._range_fetcher = NanFetcher(None, None, None)
         self._overfetched_range_pipeline = (
             self._range_fetcher  # used in get_range and friends
         )
@@ -511,16 +515,16 @@ class PVForecast(Process):
                 make_pv_pipeline(self.hrrr_fetcher, self._pv_builder),
                 [0],
             ),
-            (
-                "correlated_generation",
-                autoregressive_features_pipeline(
-                    self.range_fetcher,
-                    lags,
-                    self.tstep,
-                    **kwargs,
-                ),
-                [0],
-            ),
+            # (
+            #     "correlated_generation",
+            #     autoregressive_features_pipeline(
+            #         self.range_fetcher,
+            #         lags,
+            #         self.tstep,
+            #         **kwargs,
+            #     ),
+            #     [0],
+            # ),
         ]
 
         # TODO add harmonics and other features

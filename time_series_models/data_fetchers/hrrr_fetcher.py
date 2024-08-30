@@ -73,7 +73,11 @@ def load_hrrr_data(
     with dask.config.set(scheduler="threading"):
         ds = xr.open_dataset(
             rpath_mapper(blob_path),
-            drop_variables=["heightAboveGround"],  # Drop magic broken variable
+            drop_variables=[
+                "heightAboveGround",
+                "isobaricInhPa",
+                "surface",
+            ],  # Drop magic broken variable
             engine="zarr",
             backend_kwargs=dict(consolidated=False),
             chunks={"valid_time": 1},
@@ -170,11 +174,7 @@ def rpath_mapper(rpath: str | typing.Iterable[str]):
 # Source Mode names match suffix in GCS blobs
 # todo: for horizon mode, resolve underlying file formats and expose client to
 #  00horizon - 48horizon only?
-SOURCE_MODES = (
-    [f"{val:02}_hour_horizon" for val in range(0, 19)]
-    + [f"{val:02}-{val+5:02}_hour_horizon" for val in range(19, 44, 6)]
-    + ["18_hour_forecast", "48_hour_forecast"]
-)
+SOURCE_MODES = ["12_hour_horizon"]
 
 
 class HrrrFetcher(GriddedDataFetcher):
@@ -195,7 +195,7 @@ class HrrrFetcher(GriddedDataFetcher):
     have enough gridded data products to look for good patterns.
     """
 
-    HRRR_GCS_BUCKET = "gcp-public-data-weather"
+    HRRR_GCS_BUCKET = "seto2243-forecasting"
     # Must define storage in this class for location mappings
     LOCATION_MAPPING: dict = {}
 
@@ -207,7 +207,7 @@ class HrrrFetcher(GriddedDataFetcher):
         location_mapping: dict | None = None,
         resource_type: str | None = None,
         resource_query: str | None = None,
-        source_mode: str = "48_hour_forecast",
+        source_mode: str = "12_hour_horizon",
     ):
         """
         Initialize Fetcher base class and configure selector for variable selection or groupby operations.
@@ -286,50 +286,7 @@ class HrrrFetcher(GriddedDataFetcher):
             hour,
         )
 
-        base = f"gcs://{self.HRRR_GCS_BUCKET}/high-resolution-rapid-refresh/version_2"
-        match self.source_mode:
-            case "18_hour_forecast":
-                if end - start > np.timedelta64(18, "h"):
-                    raise RuntimeError(
-                        f"Grid Point Fetcher configured with 18 hour model, "
-                        f"but requested range is {end - start}"
-                    )
-
-                return f"{base}/forecast_run/conus/hrrr.{year}{month:02}{day:02}/hrrr.t{hour:02}z.{self.model}.{self.source_mode}.zarr"
-
-            case "48_hour_forecast":
-                if end - start > np.timedelta64(48, "h"):
-                    raise RuntimeError(
-                        f"Grid Point Fetcher configured with 48 hour model, "
-                        f"but requested range is {end - start}"
-                    )
-
-                return f"{base}/forecast_run/conus/hrrr.{year}{month:02}{day:02}/hrrr.t{math.floor(hour/6) * 6:02}z.{self.model}.{self.source_mode}.zarr"
-
-            case _:
-                start_padded = start.astype("datetime64[M]") - np.timedelta64(1, "M")
-                end_padded = end.astype("datetime64[M]") + np.timedelta64(2, "M")
-                dates = np.arange(start_padded, end_padded, np.timedelta64(1, "M"))
-                dates = zip(
-                    TimeUnitEnum("Y").as_unit(dates),
-                    TimeUnitEnum("M").as_unit(dates),
-                )
-                blobs = []
-                fs = fsspec.filesystem("gcs", token=None)
-                for year, month in dates:
-                    blob = f"{base}/monthly_horizon/conus/hrrr.{year}{month:02}/hrrr.{self.model}.{self.source_mode}.zarr"
-                    if fs.exists(blob):
-                        blobs.append(blob)
-                    else:
-                        logger.debug("Data for month %s doesn't exist", blob)
-
-                if not blobs:
-                    raise FileNotFoundError(
-                        f"None of the requested monthly HRRR blobs could be found in {base}/monthly_horizon/conus/"
-                    )
-
-                logger.debug("Loading hrrr for: %s", blobs)
-                return blobs
+        return f"gcs://{self.HRRR_GCS_BUCKET}/high-resolution-rapid-refresh/hrrr_12_hour_horizon_2021.json"
 
     def source_loader(self, start, end, *domain_locations):
         """

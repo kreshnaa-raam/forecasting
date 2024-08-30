@@ -19,6 +19,17 @@ the composable model framework. Example PV model construction is shown below.
 The API for fit, predict, and metrics is reduced to specifying a start and end times for a given location.
 The model must construct feature data using column transforms. Having done so, forecasting as a service become trivial.
 
+## Getting started
+
+Users can verify the code works with the example_forecast.py script by running `docker compose up --build`
+The log output from the container will include feature and weather data as well as predicted values. The script
+takes several minutes to run because the weather data is large.
+
+The dockerfile included in the project will run the example_forecast.py which demonstrates both the machine
+learning model for AMI meter forecasting and the physics based PV model using PySam. Users can then choose between
+their local working environment and containerized environment to extend and experiment with the time series models
+library.
+
 ## Installation
 
 This library is designed for use by technical engineers and data scientists. It takes advantage of the Python
@@ -69,8 +80,6 @@ jupyter notebook --NotebookApp.ip=0.0.0.0
 ```
 
 This will print a URL, which you can open in your browser. Then open the example notebook and execute the cells in the demonstration to get acquainted with the functionality.
-
-<!-- TODO: add docker executable image in July 2024 -->
 
 ## Usage
 Models can be composed of mixins for various estimators and forecast processes. These composable
@@ -159,11 +168,18 @@ using machine learning models like xgboost too.
 
 ```python
 pv_config = dict(
-    site_config_mapping="RESOURCE_SELF",
-    site_meter_mapping=None,
-    site_latlong_mapping="RESOURCE_SELF",
-    source_mode="12_hour_horizon",
-    lags=None,
+  lags=None,
+  site_config_mapping={
+    "capybara": ["/app/pv_site.json"],
+  },
+  site_latlong_mapping={
+    "capybara": dict(
+      latitude=40.0,
+      longitude=-100.0,
+    ),
+  },
+  site_meter_mapping=None,
+  source_mode="12_hour_horizon",
 )
 
 class PVForecastModel(
@@ -186,7 +202,6 @@ Engineers and data scientists commonly use an interactive web-based development 
 An [example notebook](https://github.com/SETO2243/forecasting/blob/main/example.ipynb) is provided in this GitHub
 repository which demonstrates the core capabilities of the time series models library developed for the SETO project. 
 
-<!-- TODO: Add screen shot of dockerized output, July 2024-->
 
 ## Input Data
 

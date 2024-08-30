@@ -88,8 +88,8 @@ class AmiFetcher(Fetcher):
     """
 
     # TODO: update GCS_BUCKET and GCS_PATH_FORMAT depending on where prod data land
-    GCS_BUCKET = None
-    GCS_PATH_FORMAT = "Arroyo_Hondo_AMI_data/{units:s}/{meter:s}_{units:s}.csv.gz"
+    GCS_BUCKET = "seto2243-forecasting"
+    GCS_PATH_FORMAT = "ami_validation/{meter:s}_{units:s}.csv.gz"
 
     # for testing only # TODO(Michael H): extract to Fetcher class?
     FILE_SYSTEM_URIS = {}
