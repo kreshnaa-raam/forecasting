@@ -515,6 +515,7 @@ class PVForecast(Process):
                 make_pv_pipeline(self.hrrr_fetcher, self._pv_builder),
                 [0],
             ),
+            # TODO: add lagged correlation features for ML
             # (
             #     "correlated_generation",
             #     autoregressive_features_pipeline(
@@ -527,7 +528,7 @@ class PVForecast(Process):
             # ),
         ]
 
-        # TODO add harmonics and other features
+        # TODO add harmonics and other features for ML
 
         return sklearn.compose.ColumnTransformer(
             transformers=transformers,
