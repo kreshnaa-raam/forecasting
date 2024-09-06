@@ -21,7 +21,7 @@ The model must construct feature data using column transforms. Having done so, f
 
 ## Getting started
 
-Users can verify the code works with the example_forecast.py script by running `docker compose up --build`
+Users can verify the code works with the `example_forecast.py` script by running `docker compose up --build`
 The log output from the container will include feature and weather data as well as predicted values. The script
 takes several minutes to run because the weather data is large.
 
@@ -30,7 +30,96 @@ learning model for AMI meter forecasting and the physics based PV model using Py
 their local working environment and containerized environment to extend and experiment with the time series models
 library.
 
-## Installation
+The dockerized example is a great place to start for experimentation and further development. 
+### Expected output
+Once the container layers are running (this will take several minutes) the console log will show
+```console
+[+] Running 1/1
+ ✔ Container seto_forecasting-server-1  Recreated                                                                                                                                    0.7s
+Attaching to seto_forecasting-server-1
+```
+
+#### AMI Meter Model
+The first example is a meter level xgboost estimator
+```console
+seto_forecasting-server-1  | INFO:__main__:Starting forecast example for AMI meter forecast with XgBoost estimator!
+seto_forecasting-server-1  | INFO:time_series_models.transformers:Constructing overfetched range pipeline using lags [  0 168]
+seto_forecasting-server-1  | INFO:time_series_models.processes:Instantiating RegularTimeSeriesModels with kwargs {'day_of_week': True, 'harmonics': array([  24,  168, 8760], dtype='timedelta64[h]'), 'met_vars': ['t', 'r2'], 'met_horizon': 12, 'mapping': {'p2ulv18716': {'latitude': 35.0, 'longitude': -75.0}}}
+```
+There will be a good deal more log messages (and a few minutes to download weather data) for training and prediction
+followed by the (truncated) results of the prediction run for the `p2ulv18716` meter.
+```console
+seto_forecasting-server-1  | INFO:time_series_models.data_fetchers.fetcher:Finished 'HrrrFetcher' 'get_data' in 248.3485 secs
+seto_forecasting-server-1  | INFO:time_series_models.data_fetchers.fetcher:Finished 'AmiFetcher' 'get_data' in 0.0837 secs
+seto_forecasting-server-1  | INFO:__main__:Predicted:                                   predicted         true
+seto_forecasting-server-1  | location   date_time
+seto_forecasting-server-1  | p2ulv18716 2021-01-01 00:00:00   785.116394   600.156056
+seto_forecasting-server-1  |            2021-01-01 01:00:00   717.555481  2579.214714
+seto_forecasting-server-1  |            2021-01-01 02:00:00   817.579041  2720.881345
+seto_forecasting-server-1  |            2021-01-01 03:00:00   507.064819  2341.922617
+seto_forecasting-server-1  |            2021-01-01 04:00:00   444.800018  2124.941260
+seto_forecasting-server-1  | ...                                     ...          ...
+seto_forecasting-server-1  |            2021-02-04 20:00:00   513.341370   425.300693
+seto_forecasting-server-1  |            2021-02-04 21:00:00   591.890686   459.267964
+seto_forecasting-server-1  |            2021-02-04 22:00:00  2320.842773   546.954250
+seto_forecasting-server-1  |            2021-02-04 23:00:00  2011.579346   599.035650
+seto_forecasting-server-1  |            2021-02-05 00:00:00  2223.689941   652.819004
+seto_forecasting-server-1  |
+seto_forecasting-server-1  | [841 rows x 2 columns]
+```
+
+#### PV Physics Model
+The PV physics model will continue immediately with
+```console
+seto_forecasting-server-1  | INFO:__main__:Starting forecast example for PV physical forecast!
+```
+Intermediate weather data will be visible during the training and prediction steps, extracted for the time range, 
+latitude and longitude of the site.
+```console
+seto_forecasting-server-1  | INFO:time_series_models.transformers_pv:Feature DF:                        ghi    dni    dhi    temp_air  wind_speed
+seto_forecasting-server-1  | date_time
+seto_forecasting-server-1  | 2021-02-01 00:00:00    0.0    0.0    0.0  275.616852    2.302358
+seto_forecasting-server-1  | 2021-02-01 01:00:00    0.0    0.0    0.0  273.182281    3.805551
+seto_forecasting-server-1  | 2021-02-01 02:00:00    0.0    0.0    0.0  271.327850    2.718800
+seto_forecasting-server-1  | 2021-02-01 03:00:00    0.0    0.0    0.0  270.273697    4.061844
+seto_forecasting-server-1  | 2021-02-01 04:00:00    0.0    0.0    0.0  270.467178    4.645654
+seto_forecasting-server-1  | ...                    ...    ...    ...         ...         ...
+seto_forecasting-server-1  | 2021-02-04 20:00:00  586.1  969.0   77.0  281.806671   12.966594
+seto_forecasting-server-1  | 2021-02-04 21:00:00  485.4  924.0   72.1  282.243988   15.832714
+seto_forecasting-server-1  | 2021-02-04 22:00:00  325.8  547.0  147.3  281.664047   16.190084
+seto_forecasting-server-1  | 2021-02-04 23:00:00  128.7  236.0   88.2  279.410828   14.847732
+seto_forecasting-server-1  | 2021-02-05 00:00:00    0.0    0.0    0.0  276.510498   12.012517
+```
+Finally, the predicted values for the `capybara` PV demo site will be logged.
+```console
+seto_forecasting-server-1  | INFO:time_series_models.transformers_pv:Trying to load from: /app/pv_site.json
+seto_forecasting-server-1  | INFO:__main__:pv predictions:                                  predicted
+seto_forecasting-server-1  | location date_time
+seto_forecasting-server-1  | capybara 2021-02-01 00:00:00  2.555532e+02
+seto_forecasting-server-1  |          2021-02-01 01:00:00  2.555532e+02
+seto_forecasting-server-1  |          2021-02-01 02:00:00  2.555532e+02
+seto_forecasting-server-1  |          2021-02-01 03:00:00  2.555532e+02
+seto_forecasting-server-1  |          2021-02-01 04:00:00  2.555532e+02
+seto_forecasting-server-1  | ...                                    ...
+seto_forecasting-server-1  |          2021-02-04 20:00:00 -1.007929e+06
+seto_forecasting-server-1  |          2021-02-04 21:00:00 -1.096734e+06
+seto_forecasting-server-1  |          2021-02-04 22:00:00 -9.101299e+05
+seto_forecasting-server-1  |          2021-02-04 23:00:00 -4.854458e+05
+seto_forecasting-server-1  |          2021-02-05 00:00:00  2.555532e+02
+seto_forecasting-server-1  |
+seto_forecasting-server-1  | [97 rows x 1 columns]
+seto_forecasting-server-1  | INFO:root:All done!
+```
+
+Some systems may return an error code on exit.
+```console
+seto_forecasting-server-1  | free(): invalid pointer
+seto_forecasting-server-1  | Aborted
+seto_forecasting-server-1 exited with code 134
+```
+This is likely related to an issue with the version of the pysam library but it does not affect the execution of the example.
+
+### Development & Installation
 
 This library is designed for use by technical engineers and data scientists. It takes advantage of the Python
 data science ecosystem and therefore requires installation of many third party open source libraries. It has 
@@ -38,7 +127,11 @@ been developed and tested in a Linux operating system. Running on a Docker conta
 the [canonical Ubuntu image](https://hub.docker.com/_/ubuntu) is strongly recommended. The library was 
 developed using Ubuntu 22.04 (Jammy) with Python 3.10.6.
 
-### Installing system libraries
+The docker file included in the repository only runs the `example_forecast.py` file. The following code snippets
+are provided as helpful steps toward building a developer environment where you can run unit tests, forecasting scripts
+and jupyter notebooks.
+
+#### Installing system libraries
 
 After installing [Docker](https://docs.docker.com/engine/install/), run the following command to setup a basic Jammy container with this library:
 
@@ -73,6 +166,7 @@ python -m unittest
 
 This will print "SUCCESS" near the end if the code work correctly in your new environment.
 
+### Running a notebook
 To start jupyter notebook run:
 
 ```sh
