@@ -259,7 +259,7 @@ class Fetcher(ABC, TransformerMixin, BaseEstimator):
     @classmethod
     def get_gcs_client(cls):
         if not cls._GCS_CLIENT:
-            client = storage.Client()
+            client = storage.Client.create_anonymous_client()
             adapter = requests.adapters.HTTPAdapter(
                 pool_connections=128, pool_maxsize=128, max_retries=3, pool_block=True
             )

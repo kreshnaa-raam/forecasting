@@ -25,7 +25,7 @@ mypy==0.950
 notebook==6.4.11
 nrel-pysam==3.0.2
 numba==0.55.2
-numcodecs==0.11.0
+numcodecs==0.13.0
 numpy==1.22.3
 openpyxl==3.0.7
 pandas==1.4.2

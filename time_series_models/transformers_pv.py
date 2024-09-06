@@ -94,6 +94,8 @@ def pv_function(X, pv_model_builder: PvModelBuilder):
         )
         dataframe.index.name = "date_time"
 
+        logger.info("Feature DF: %s", dataframe)
+
         pv_systems = pv_model_builder(location)
         if len(pv_systems) > 1:
             # Make a copy - pvsystem may do bad things to the dataframe
