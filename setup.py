@@ -28,5 +28,5 @@ setuptools.setup(
             "black",
         ]
     },
-    python_requires="~=3.10.6",
+    python_requires="~=3.11.10",
 )
