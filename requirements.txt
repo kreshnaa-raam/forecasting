@@ -5,7 +5,7 @@ cloudpickle==2.0.0
 dask==2023.3.2
 distributed==2023.3.2
 eccodes==1.5.2
-fsspec==2023.4.0
+fsspec
 gcsfs==2023.4.0
 google-api-core==2.11.0
 google-api-python-client==2.57.0
