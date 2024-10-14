@@ -24,7 +24,7 @@ matplotlib==3.5.2
 mypy==0.950
 notebook==6.4.11
 nrel-pysam
-numba==0.55.2
+numba
 numcodecs==0.13.0
 numpy==1.22.3
 openpyxl==3.0.7
